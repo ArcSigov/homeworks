@@ -1,4 +1,4 @@
-module github.com/ArcSigov/homeworks/tree/master/hw01_hello_otus
+module github.com/ArcSigov/homeworks/hw01_hello_otus
 
 go 1.19
 
