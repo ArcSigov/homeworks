@@ -16,6 +16,9 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
+		//добавление рун для проверки
+		{input: "🁐5", expected: "🁐🁐🁐🁐🁐"},
+		{input: "㌀2🂲3", expected: "㌀㌀🂲🂲🂲"},
 		// uncomment if task with asterisk completed
 		// {input: `qwe\4\5`, expected: `qwe45`},
 		// {input: `qwe\45`, expected: `qwe44444`},
@@ -42,4 +45,17 @@ func TestUnpackInvalidString(t *testing.T) {
 			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
 	}
+}
+
+// тест проверки паник при работе с функцией Unpack
+// при неправильном алгоритме возможна ситуация с формированием полного числа
+// прежде чем выбить ошибку формата
+func TestPanic(t *testing.T) {
+	input_str := "a4444444444444444444444444444444444444444b99999999999999999999999999с88888"
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Function Unpack call panic!")
+		}
+	}()
+	Unpack(input_str)
 }
