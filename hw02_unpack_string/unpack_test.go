@@ -16,14 +16,16 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
-		//добавление рун для проверки
+		//add runes
 		{input: "🁐5", expected: "🁐🁐🁐🁐🁐"},
 		{input: "㌀2🂲3", expected: "㌀㌀🂲🂲🂲"},
-		// uncomment if task with asterisk completed
-		// {input: `qwe\4\5`, expected: `qwe45`},
-		// {input: `qwe\45`, expected: `qwe44444`},
-		// {input: `qwe\\5`, expected: `qwe\\\\\`},
-		// {input: `qwe\\\3`, expected: `qwe\3`},
+		//add slashed
+		{input: `qwe\4\5`, expected: `qwe45`},
+		{input: `qwe\45`, expected: `qwe44444`},
+		{input: `qwe\\5`, expected: `qwe\\\\\`},
+		{input: `qwe\\\3`, expected: `qwe\3`},
+		{input: `qwe\\3a4\`, expected: `qwe\\\aaaa\`},
+		{input: `qwe\\3㌀2🂲3`, expected: `qwe\\\㌀㌀🂲🂲🂲`},
 	}
 
 	for _, tc := range tests {
@@ -37,7 +39,7 @@ func TestUnpack(t *testing.T) {
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
+	invalidStrings := []string{"3abc", "45", "aaa10b", `qwe\\55de`, `qwe\nde`, `2qwe\\5`}
 	for _, tc := range invalidStrings {
 		tc := tc
 		t.Run(tc, func(t *testing.T) {
@@ -47,9 +49,8 @@ func TestUnpackInvalidString(t *testing.T) {
 	}
 }
 
-// тест проверки паник при работе с функцией Unpack
-// при неправильном алгоритме возможна ситуация с формированием полного числа
-// прежде чем выбить ошибку формата
+// panic test
+// this test check's call panic, if developer generate long repeat value with atoi function and string
 func TestPanic(t *testing.T) {
 	input_str := "a4444444444444444444444444444444444444444b99999999999999999999999999с88888"
 	defer func() {

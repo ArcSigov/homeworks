@@ -7,39 +7,122 @@ import (
 )
 
 var ErrInvalidString = errors.New("invalid string")
+var badslashedch = errors.New("bad character")
+var outOfRange = errors.New("out of range")
 
-func Unpack(input_str string) (string, error) {
-	var rune_map = make(map[int]rune)
+// function search slashed symbol with setted rules
+func parseSlash(pos int, input_str map[int]rune) (string, error) {
+
+	if pos >= len(input_str) {
+		return "", outOfRange
+	}
+
+	ch := string(input_str[pos])
+
+	if ch == `\` || (ch >= `0` && ch <= `9`) {
+		return ch, nil
+	} else {
+		return "", badslashedch
+	}
+
+}
+
+// unpack difficult string with slash
+func unpackSlash(input_str map[int]rune) (string, error) {
 	var output_str strings.Builder
 
-	i := 0 // первый курсор отслеживает нахождение символа (не числа!) в строке
-	j := 1 // второй курсор отслеживает нахождение числа в строке
-	// с помощью которого нужно выполнить нужное количество повторений символа
+	i := 0
+	j := 1
+	count := 0
+	var slashedch string
 
-	//первый шаг - формирование хэш-таблицы строки
-	//при содержании в строке различных символов unicode его размер может быть разный
-	//для этого выполняется выравнивание индексов
-	for _, value := range input_str {
-		rune_map[i] = value
-		i++
-	}
-	i = 0
-
-	//проход по хэш-таблице и распаковка строки
-	for i < len(rune_map) {
-		if _, err := strconv.Atoi(string(rune_map[i])); err == nil {
+	for i < len(input_str) {
+		// classic
+		count = 1
+		if _, err := strconv.Atoi(string(input_str[i])); err == nil {
 			return "", ErrInvalidString
-		} else if j < len(rune_map) {
-			if repeat_count, err := strconv.Atoi(string(rune_map[j])); err == nil {
-				output_str.WriteString(strings.Repeat(string(rune_map[i]), repeat_count))
-				i += 2
+			// if founded `\``
+		} else if _slashedch, errf := parseSlash(i+1, input_str); errf == nil && string(input_str[i]) == `\` {
+			slashedch = _slashedch // save slashed symb
+			j++                    // move j to next position
+			i += 3                 // move i to next position of character
+		} else if string(input_str[i]) == `\` && errf == badslashedch {
+			return "", ErrInvalidString
+		}
+
+		// search repeat count
+		if j < len(input_str) {
+			if _count, err := strconv.Atoi(string(input_str[j])); err == nil {
+				count = _count
 				j += 2
+			} else {
+				j++
+				// move i back
+				if len(slashedch) > 0 {
+					i--
+				}
+			}
+		}
+
+		//make output string
+		if len(slashedch) > 0 {
+			output_str.WriteString(strings.Repeat(slashedch, count))
+			slashedch = ""
+		} else {
+			output_str.WriteString(strings.Repeat(string(input_str[i]), count))
+			if count != 1 {
+				i += 2
+			} else {
+				i++
+			}
+		}
+	}
+
+	return output_str.String(), nil
+}
+
+func unpack(input_str map[int]rune) (string, error) {
+
+	var output_str strings.Builder
+
+	i := 0
+	j := 1
+
+	for i < len(input_str) {
+		if _, err := strconv.Atoi(string(input_str[i])); err == nil {
+			return "", ErrInvalidString
+		} else if j < len(input_str) {
+			if repeat_count, err := strconv.Atoi(string(input_str[j])); err == nil {
+				output_str.WriteString(strings.Repeat(string(input_str[i]), repeat_count))
+				i += 2 //move i to next character
+				j += 2 //move j to next repeat-character if this character will be finded
 				continue
 			}
 		}
-		output_str.WriteRune(rune_map[i])
+		//make output string
+		output_str.WriteRune(input_str[i])
 		i++
 		j++
 	}
 	return output_str.String(), nil
+}
+
+func Unpack(input_str string) (string, error) {
+
+	var rune_map = make(map[int]rune)
+	i := 0
+
+	//make alligned hash of characters if character implemented has non-standard rune
+	// etc. emoji, domino;)
+	for _, value := range input_str {
+		rune_map[i] = value
+		i++
+	}
+
+	// two scenarious
+	if strings.Contains(input_str, `\`) {
+		return unpackSlash(rune_map)
+	} else {
+		return unpack(rune_map)
+	}
 }
