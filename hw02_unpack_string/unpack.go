@@ -6,122 +6,73 @@ import (
 	"strings"
 )
 
-var (
-	ErrInvalidString = errors.New("invalid string")
-	errBadCh         = errors.New("bad character")
-	errOutOfRange    = errors.New("out of range")
-)
+var ErrInvalidString = errors.New("invalid string")
 
-// function search slashed symbol with setted rules.
-
-func parseSlash(pos int, inputStr map[int]rune) (string, error) {
-	if pos >= len(inputStr) {
-		return "", errOutOfRange
-	}
-
-	ch := string(inputStr[pos])
-
-	if ch == `\` || (ch >= `0` && ch <= `9`) {
-		return ch, nil
-	}
-	return "", errBadCh
-}
-
-// unpack difficult string with slash.
-
-func unpackSlash(inputStr map[int]rune) (string, error) {
-	var outputStr strings.Builder
-
-	i := 0
-	j := 1
-	count := 0
-	var slashedch string
-
-	for i < len(inputStr) {
-		// classic.
-		count = 1
-		if _, err := strconv.Atoi(string(inputStr[i])); err == nil {
-			return "", ErrInvalidString
-			// if founded `\``.
-		} else if string(inputStr[i]) == `\` {
-			if _slashedch, errf := parseSlash(i+1, inputStr); errf == nil {
-				slashedch = _slashedch // save slashed symb.
-				j++                    // move j to next position.
-				i += 3                 // move i to next position of character.
-			} else if errors.Is(errf, errBadCh) {
-				return "", ErrInvalidString
-			}
-		}
-
-		// search repeat count.
-		if j < len(inputStr) {
-			if _count, err := strconv.Atoi(string(inputStr[j])); err == nil {
-				count = _count
-				j += 2
-			} else {
-				j++
-				// move i back.
-				if len(slashedch) > 0 {
-					i--
-				}
-			}
-		}
-
-		// make output string.
-		if len(slashedch) > 0 {
-			outputStr.WriteString(strings.Repeat(slashedch, count))
-			slashedch = ""
-		} else {
-			outputStr.WriteString(strings.Repeat(string(inputStr[i]), count))
-			if count != 1 {
-				i += 2
-			} else {
-				i++
-			}
-		}
-	}
-	return outputStr.String(), nil
-}
-
-func unpack(inputStr map[int]rune) (string, error) {
-	var outputStr strings.Builder
-
-	i := 0
-	j := 1
-
-	for i < len(inputStr) {
-		if _, err := strconv.Atoi(string(inputStr[i])); err == nil {
-			return "", ErrInvalidString
-		} else if j < len(inputStr) {
-			if repeatCount, err := strconv.Atoi(string(inputStr[j])); err == nil {
-				outputStr.WriteString(strings.Repeat(string(inputStr[i]), repeatCount))
-				i += 2 // move i to next character.
-				j += 2 // move j to next repeat-character if this character will be finded.
-				continue
-			}
-		}
-		// make output string.
-		outputStr.WriteRune(inputStr[i])
-		i++
-		j++
-	}
-	return outputStr.String(), nil
+type characterParam struct {
+	character string
+	isSlash   bool
+	isSlashed bool
 }
 
 func Unpack(inputStr string) (string, error) {
-	i := 0
-	charactersHash := make(map[int]rune)
-
-	// make aligned hash of characters, if character implemented has non-standard rune.
-	// etc. emoji, domino;).
-	for _, value := range inputStr {
-		charactersHash[i] = value
-		i++
+	var outputStr strings.Builder
+	prev := characterParam{"", false, false}
+	start := true
+	for _, current := range inputStr {
+		if start {
+			prev.character = string(current)
+			if prev.character == `\` {
+				prev.isSlash = true
+			} else if prev.character >= "0" && prev.character <= "9" {
+				return "", ErrInvalidString
+			}
+			start = false
+			continue
+		}
+		repeatCount, err := strconv.Atoi(string(current))
+		if err == nil {
+			switch {
+			case !prev.isSlashed && (prev.character == "" || prev.character >= "0" && prev.character <= "9"):
+				return "", ErrInvalidString
+			// formatting slash.
+			case prev.isSlash:
+				prev.character = string(current)
+				prev.isSlash = false
+				prev.isSlashed = true
+			// print formatted character repeat count.
+			default:
+				outputStr.WriteString(strings.Repeat(prev.character, repeatCount))
+				prev.character = ""
+				prev.isSlash = false
+				prev.isSlashed = false
+			}
+			// work with characters.
+		} else {
+			switch {
+			// if prevcharacter empty -> save current.
+			case prev.character == "":
+				prev.character = string(current)
+			// if prevcharacter is slash -> check rules for slash.
+			case prev.isSlash:
+				if string(current) != `\` && !(string(current) >= "0" && string(current) <= "9") {
+					return "", ErrInvalidString
+				}
+				prev.isSlash = false
+				prev.isSlashed = true
+				prev.character = string(current)
+			// print non-formatted characters.
+			default:
+				outputStr.WriteString(prev.character)
+				prev.character = string(current)
+				if prev.character == `\` {
+					prev.isSlash = true
+				}
+			}
+		}
 	}
-
-	// two scenarios.
-	if strings.Contains(inputStr, `\`) {
-		return unpackSlash(charactersHash)
+	// print last character.
+	if prev.character != "" {
+		outputStr.WriteString(prev.character)
 	}
-	return unpack(charactersHash)
+	return outputStr.String(), nil
 }
