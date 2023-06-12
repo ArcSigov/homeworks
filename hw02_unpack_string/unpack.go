@@ -14,6 +14,10 @@ type characterParam struct {
 	isSlashed bool
 }
 
+func isDigit(ch string) bool {
+	return ch >= "0" && ch <= "9"
+}
+
 func prevInit(inputStr string, prev *characterParam) error {
 	r := []rune(inputStr)
 	if len(r) > 0 {
@@ -21,7 +25,7 @@ func prevInit(inputStr string, prev *characterParam) error {
 	}
 	if prev.character == `\` {
 		prev.isSlash = true
-	} else if prev.character >= "0" && prev.character <= "9" {
+	} else if isDigit(prev.character) {
 		return ErrInvalidString
 	}
 	return nil
@@ -41,7 +45,7 @@ func Unpack(inputStr string) (string, error) {
 		}
 		if repeatCount, err := strconv.Atoi(string(current)); err == nil {
 			switch {
-			case !prev.isSlashed && (prev.character == "" || prev.character >= "0" && prev.character <= "9"):
+			case !prev.isSlashed && (prev.character == "" || isDigit(prev.character)):
 				return "", ErrInvalidString
 			// formatting slash.
 			case prev.isSlash:
@@ -64,7 +68,7 @@ func Unpack(inputStr string) (string, error) {
 			prev.character = string(current)
 		// if prevcharacter is slash -> check rules for slash.
 		case prev.isSlash:
-			if string(current) != `\` && !(string(current) >= "0" && string(current) <= "9") {
+			if string(current) != `\` && !isDigit(string(current)) {
 				return "", ErrInvalidString
 			}
 			prev.isSlash = false
