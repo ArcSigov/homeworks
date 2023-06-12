@@ -112,7 +112,7 @@ func Unpack(input_str string) (string, error) {
 	var rune_map = make(map[int]rune)
 	i := 0
 
-	//make alligned hash of characters if character implemented has non-standard rune
+	//make alligned hash of characters, if character implemented has non-standard rune
 	// etc. emoji, domino;)
 	for _, value := range input_str {
 		rune_map[i] = value

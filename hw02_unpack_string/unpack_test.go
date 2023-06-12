@@ -21,6 +21,9 @@ func TestUnpack(t *testing.T) {
 		{input: "㌀2🂲3", expected: "㌀㌀🂲🂲🂲"},
 		//add slashed
 		{input: `qwe\4\5`, expected: `qwe45`},
+		{input: `\1qwe\4\5`, expected: `1qwe45`},
+		{input: `\\1qwe\4\5`, expected: `\qwe45`},
+		{input: `\\0qwe\4\5`, expected: `qwe45`},
 		{input: `qwe\45`, expected: `qwe44444`},
 		{input: `qwe\\5`, expected: `qwe\\\\\`},
 		{input: `qwe\\\3`, expected: `qwe\3`},
