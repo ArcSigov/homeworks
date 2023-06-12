@@ -14,23 +14,32 @@ type characterParam struct {
 	isSlashed bool
 }
 
+func prevInit(inputStr string, prev *characterParam) error {
+	for _, current := range inputStr {
+		prev.character = string(current)
+		if prev.character == `\` {
+			prev.isSlash = true
+			return nil
+		} else if prev.character >= "0" && prev.character <= "9" {
+			return ErrInvalidString
+		}
+	}
+	return nil
+}
+
 func Unpack(inputStr string) (string, error) {
 	var outputStr strings.Builder
 	prev := characterParam{"", false, false}
+	if err := prevInit(inputStr, &prev); err != nil {
+		return "", ErrInvalidString
+	}
 	start := true
 	for _, current := range inputStr {
 		if start {
-			prev.character = string(current)
-			if prev.character == `\` {
-				prev.isSlash = true
-			} else if prev.character >= "0" && prev.character <= "9" {
-				return "", ErrInvalidString
-			}
 			start = false
 			continue
 		}
-		repeatCount, err := strconv.Atoi(string(current))
-		if err == nil {
+		if repeatCount, err := strconv.Atoi(string(current)); err == nil {
 			switch {
 			case !prev.isSlashed && (prev.character == "" || prev.character >= "0" && prev.character <= "9"):
 				return "", ErrInvalidString
@@ -71,8 +80,6 @@ func Unpack(inputStr string) (string, error) {
 		}
 	}
 	// print last character.
-	if prev.character != "" {
-		outputStr.WriteString(prev.character)
-	}
+	outputStr.WriteString(prev.character)
 	return outputStr.String(), nil
 }
