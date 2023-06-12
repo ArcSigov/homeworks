@@ -15,14 +15,14 @@ type characterParam struct {
 }
 
 func prevInit(inputStr string, prev *characterParam) error {
-	for _, current := range inputStr {
-		prev.character = string(current)
-		if prev.character == `\` {
-			prev.isSlash = true
-			return nil
-		} else if prev.character >= "0" && prev.character <= "9" {
-			return ErrInvalidString
-		}
+	r := []rune(inputStr)
+	if len(r) > 0 {
+		prev.character = string(r[0])
+	}
+	if prev.character == `\` {
+		prev.isSlash = true
+	} else if prev.character >= "0" && prev.character <= "9" {
+		return ErrInvalidString
 	}
 	return nil
 }
