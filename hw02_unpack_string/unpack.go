@@ -7,69 +7,70 @@ import (
 )
 
 var ErrInvalidString = errors.New("invalid string")
-var badslashedch = errors.New("bad character")
-var outOfRange = errors.New("out of range")
+var errBadCh = errors.New("bad character")
+var errOutOfRange = errors.New("out of range")
 
-// function search slashed symbol with setted rules
-func parseSlash(pos int, input_str map[int]rune) (string, error) {
+// function search slashed symbol with setted rules.
 
-	if pos >= len(input_str) {
-		return "", outOfRange
+func parseSlash(pos int, inputStr map[int]rune) (string, error) {
+	if pos >= len(inputStr) {
+		return "", errOutOfRange
 	}
 
-	ch := string(input_str[pos])
+	ch := string(inputStr[pos])
 
 	if ch == `\` || (ch >= `0` && ch <= `9`) {
 		return ch, nil
-	} else {
-		return "", badslashedch
 	}
-
+	return "", errBadCh
 }
 
-// unpack difficult string with slash
-func unpackSlash(input_str map[int]rune) (string, error) {
-	var output_str strings.Builder
+// unpack difficult string with slash.
+
+func unpackSlash(inputStr map[int]rune) (string, error) {
+	var outputStr strings.Builder
 
 	i := 0
 	j := 1
 	count := 0
 	var slashedch string
 
-	for i < len(input_str) {
-		// classic
+	for i < len(inputStr) {
+		// classic.
 		count = 1
-		if _, err := strconv.Atoi(string(input_str[i])); err == nil {
+		if _, err := strconv.Atoi(string(inputStr[i])); err == nil {
 			return "", ErrInvalidString
-			// if founded `\``
-		} else if _slashedch, errf := parseSlash(i+1, input_str); errf == nil && string(input_str[i]) == `\` {
-			slashedch = _slashedch // save slashed symb
-			j++                    // move j to next position
-			i += 3                 // move i to next position of character
-		} else if string(input_str[i]) == `\` && errf == badslashedch {
-			return "", ErrInvalidString
+			// if founded `\``.
+		} else if string(inputStr[i]) == `\` {
+			if _slashedch, errf := parseSlash(i+1, inputStr); errf == nil {
+				slashedch = _slashedch // save slashed symb.
+				j++                    // move j to next position.
+				i += 3                 // move i to next position of character.
+			} else if errors.Is(errf, errBadCh) {
+				return "", ErrInvalidString
+			}
 		}
 
-		// search repeat count
-		if j < len(input_str) {
-			if _count, err := strconv.Atoi(string(input_str[j])); err == nil {
+		// search repeat count.
+		if j < len(inputStr) {
+			if _count, err := strconv.Atoi(string(inputStr[j])); err == nil {
 				count = _count
 				j += 2
 			} else {
 				j++
-				// move i back
+				// move i back.
 				if len(slashedch) > 0 {
 					i--
 				}
 			}
 		}
 
-		//make output string
+		// make output string.
 		if len(slashedch) > 0 {
-			output_str.WriteString(strings.Repeat(slashedch, count))
+			outputStr.WriteString(strings.Repeat(slashedch, count))
 			slashedch = ""
 		} else {
-			output_str.WriteString(strings.Repeat(string(input_str[i]), count))
+			outputStr.WriteString(strings.Repeat(string(inputStr[i]), count))
 			if count != 1 {
 				i += 2
 			} else {
@@ -77,52 +78,48 @@ func unpackSlash(input_str map[int]rune) (string, error) {
 			}
 		}
 	}
-
-	return output_str.String(), nil
+	return outputStr.String(), nil
 }
 
-func unpack(input_str map[int]rune) (string, error) {
-
-	var output_str strings.Builder
+func unpack(inputStr map[int]rune) (string, error) {
+	var outputStr strings.Builder
 
 	i := 0
 	j := 1
 
-	for i < len(input_str) {
-		if _, err := strconv.Atoi(string(input_str[i])); err == nil {
+	for i < len(inputStr) {
+		if _, err := strconv.Atoi(string(inputStr[i])); err == nil {
 			return "", ErrInvalidString
-		} else if j < len(input_str) {
-			if repeat_count, err := strconv.Atoi(string(input_str[j])); err == nil {
-				output_str.WriteString(strings.Repeat(string(input_str[i]), repeat_count))
-				i += 2 //move i to next character
-				j += 2 //move j to next repeat-character if this character will be finded
+		} else if j < len(inputStr) {
+			if repeatCount, err := strconv.Atoi(string(inputStr[j])); err == nil {
+				outputStr.WriteString(strings.Repeat(string(inputStr[i]), repeatCount))
+				i += 2 // move i to next character.
+				j += 2 // move j to next repeat-character if this character will be finded.
 				continue
 			}
 		}
-		//make output string
-		output_str.WriteRune(input_str[i])
+		// make output string.
+		outputStr.WriteRune(inputStr[i])
 		i++
 		j++
 	}
-	return output_str.String(), nil
+	return outputStr.String(), nil
 }
 
-func Unpack(input_str string) (string, error) {
-
-	var rune_map = make(map[int]rune)
+func Unpack(inputStr string) (string, error) {
+	var runeMap = make(map[int]rune)
 	i := 0
 
-	//make alligned hash of characters, if character implemented has non-standard rune
-	// etc. emoji, domino;)
-	for _, value := range input_str {
-		rune_map[i] = value
+	// make aligned hash of characters, if character implemented has non-standard rune.
+	// etc. emoji, domino;).
+	for _, value := range inputStr {
+		runeMap[i] = value
 		i++
 	}
 
-	// two scenarious
-	if strings.Contains(input_str, `\`) {
-		return unpackSlash(rune_map)
-	} else {
-		return unpack(rune_map)
+	// two scenarios.
+	if strings.Contains(inputStr, `\`) {
+		return unpackSlash(runeMap)
 	}
+	return unpack(runeMap)
 }

@@ -16,10 +16,10 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
-		//add runes
+		// add runes.
 		{input: "🁐5", expected: "🁐🁐🁐🁐🁐"},
 		{input: "㌀2🂲3", expected: "㌀㌀🂲🂲🂲"},
-		//add slashed
+		// add slashed.
 		{input: `qwe\4\5`, expected: `qwe45`},
 		{input: `\1qwe\4\5`, expected: `1qwe45`},
 		{input: `\\1qwe\4\5`, expected: `\qwe45`},
@@ -52,14 +52,14 @@ func TestUnpackInvalidString(t *testing.T) {
 	}
 }
 
-// panic test
-// this test check's call panic, if developer generate long repeat value with atoi function and string
+// panic test.
+// this test check's call panic, if developer generate long repeat value with atoi function and string.
 func TestPanic(t *testing.T) {
-	input_str := "a4444444444444444444444444444444444444444b99999999999999999999999999с88888"
+	inputStr := "a4444444444444444444444444444444444444444b99999999999999999999999999с88888"
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("Function Unpack call panic!")
 		}
 	}()
-	Unpack(input_str)
+	Unpack(inputStr)
 }
