@@ -6,9 +6,11 @@ import (
 	"strings"
 )
 
-var ErrInvalidString = errors.New("invalid string")
-var errBadCh = errors.New("bad character")
-var errOutOfRange = errors.New("out of range")
+var (
+	ErrInvalidString = errors.New("invalid string")
+	errBadCh         = errors.New("bad character")
+	errOutOfRange    = errors.New("out of range")
+)
 
 // function search slashed symbol with setted rules.
 
@@ -107,19 +109,19 @@ func unpack(inputStr map[int]rune) (string, error) {
 }
 
 func Unpack(inputStr string) (string, error) {
-	var runeMap = make(map[int]rune)
 	i := 0
+	charactersHash := make(map[int]rune)
 
 	// make aligned hash of characters, if character implemented has non-standard rune.
 	// etc. emoji, domino;).
 	for _, value := range inputStr {
-		runeMap[i] = value
+		charactersHash[i] = value
 		i++
 	}
 
 	// two scenarios.
 	if strings.Contains(inputStr, `\`) {
-		return unpackSlash(runeMap)
+		return unpackSlash(charactersHash)
 	}
-	return unpack(runeMap)
+	return unpack(charactersHash)
 }
