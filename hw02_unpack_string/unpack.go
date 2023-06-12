@@ -55,27 +55,27 @@ func Unpack(inputStr string) (string, error) {
 				prev.isSlash = false
 				prev.isSlashed = false
 			}
-			// work with characters.
-		} else {
-			switch {
-			// if prevcharacter empty -> save current.
-			case prev.character == "":
-				prev.character = string(current)
-			// if prevcharacter is slash -> check rules for slash.
-			case prev.isSlash:
-				if string(current) != `\` && !(string(current) >= "0" && string(current) <= "9") {
-					return "", ErrInvalidString
-				}
-				prev.isSlash = false
-				prev.isSlashed = true
-				prev.character = string(current)
-			// print non-formatted characters.
-			default:
-				outputStr.WriteString(prev.character)
-				prev.character = string(current)
-				if prev.character == `\` {
-					prev.isSlash = true
-				}
+			continue
+		}
+		// work with characters.
+		switch {
+		// if prevcharacter empty -> save current.
+		case prev.character == "":
+			prev.character = string(current)
+		// if prevcharacter is slash -> check rules for slash.
+		case prev.isSlash:
+			if string(current) != `\` && !(string(current) >= "0" && string(current) <= "9") {
+				return "", ErrInvalidString
+			}
+			prev.isSlash = false
+			prev.isSlashed = true
+			prev.character = string(current)
+		// print non-formatted characters.
+		default:
+			outputStr.WriteString(prev.character)
+			prev.character = string(current)
+			if prev.character == `\` {
+				prev.isSlash = true
 			}
 		}
 	}
