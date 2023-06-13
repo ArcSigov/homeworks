@@ -6,10 +6,7 @@ import (
 	"unicode"
 )
 
-var (
-	ErrInvalidString    = errors.New("invalid string")
-	ErrIncompleteString = errors.New("incomplete string")
-)
+var ErrInvalidString = errors.New("invalid string")
 
 type characterParam struct {
 	character string
