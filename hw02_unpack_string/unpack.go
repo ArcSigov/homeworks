@@ -16,15 +16,15 @@ type characterParam struct {
 	isSlash   bool
 }
 
-func checkDigit(current rune, prev *characterParam) error {
+func checkDigit(current rune, prev *characterParam) (bool, error) {
 	if prev.character == "" {
-		return ErrInvalidString
+		return false, ErrInvalidString
 	} else if prev.isSlash {
 		prev.character = string(current)
 		prev.isSlash = false
-		return ErrIncompleteString
+		return false, nil
 	}
-	return nil
+	return true, nil
 }
 
 func clearPrev(prev *characterParam) {
@@ -39,9 +39,9 @@ func Unpack(inputStr string) (string, error) {
 		switch {
 		// if current character is digit -> check digit and write character n-count.
 		case unicode.IsDigit(current):
-			if err := checkDigit(current, &prev); errors.Is(err, ErrInvalidString) {
+			if status, err := checkDigit(current, &prev); errors.Is(err, ErrInvalidString) {
 				return "", ErrInvalidString
-			} else if err == nil {
+			} else if status {
 				outputStr.WriteString(strings.Repeat(prev.character, int(current-'0')))
 				clearPrev(&prev)
 				continue
