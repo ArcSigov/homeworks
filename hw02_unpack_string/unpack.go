@@ -2,88 +2,67 @@ package hw02unpackstring
 
 import (
 	"errors"
-	"strconv"
 	"strings"
+	"unicode"
 )
 
-var ErrInvalidString = errors.New("invalid string")
+var (
+	ErrInvalidString    = errors.New("invalid string")
+	ErrIncompleteString = errors.New("incomplete string")
+)
 
 type characterParam struct {
 	character string
 	isSlash   bool
-	isSlashed bool
 }
 
-func isDigit(ch string) bool {
-	return ch >= "0" && ch <= "9"
-}
-
-func prevInit(inputStr string, prev *characterParam) error {
-	r := []rune(inputStr)
-	if len(r) > 0 {
-		prev.character = string(r[0])
-	}
-	if prev.character == `\` {
-		prev.isSlash = true
-	} else if isDigit(prev.character) {
+func checkDigit(current rune, prev *characterParam) error {
+	if prev.character == "" {
 		return ErrInvalidString
+	} else if prev.isSlash {
+		prev.character = string(current)
+		prev.isSlash = false
+		return ErrIncompleteString
 	}
 	return nil
 }
 
+func clearPrev(prev *characterParam) {
+	prev.character = ""
+	prev.isSlash = false
+}
+
 func Unpack(inputStr string) (string, error) {
 	var outputStr strings.Builder
-	prev := characterParam{"", false, false}
-	if err := prevInit(inputStr, &prev); err != nil {
-		return "", ErrInvalidString
-	}
-	start := true
+	var prev characterParam
 	for _, current := range inputStr {
-		if start {
-			start = false
-			continue
-		}
-		if repeatCount, err := strconv.Atoi(string(current)); err == nil {
-			switch {
-			case !prev.isSlashed && (prev.character == "" || isDigit(prev.character)):
-				return "", ErrInvalidString
-			// formatting slash.
-			case prev.isSlash:
-				prev.character = string(current)
-				prev.isSlash = false
-				prev.isSlashed = true
-			// print formatted character repeat count.
-			default:
-				outputStr.WriteString(strings.Repeat(prev.character, repeatCount))
-				prev.character = ""
-				prev.isSlash = false
-				prev.isSlashed = false
-			}
-			continue
-		}
-		// work with characters.
 		switch {
-		// if prevcharacter empty -> save current.
-		case prev.character == "":
-			prev.character = string(current)
-		// if prevcharacter is slash -> check rules for slash.
-		case prev.isSlash:
-			if string(current) != `\` && !isDigit(string(current)) {
+		// if current character is digit -> check digit and write character n-count.
+		case unicode.IsDigit(current):
+			if err := checkDigit(current, &prev); errors.Is(err, ErrInvalidString) {
 				return "", ErrInvalidString
+			} else if err == nil {
+				outputStr.WriteString(strings.Repeat(prev.character, int(current-'0')))
+				clearPrev(&prev)
+				continue
 			}
-			prev.isSlash = false
-			prev.isSlashed = true
-			prev.character = string(current)
-		// print non-formatted characters.
-		default:
+		// if current character non-digit, write previous or make slashed.
+		case prev.character != "":
+			// make slashed character.
+			if prev.isSlash {
+				if string(current) != `\` {
+					return "", ErrInvalidString
+				}
+				prev.isSlash = false
+				prev.character = string(current)
+				continue
+			}
 			outputStr.WriteString(prev.character)
-			prev.character = string(current)
-			if prev.character == `\` {
-				prev.isSlash = true
-			}
 		}
+		// clear previous and save current in previous.
+		prev.character = string(current)
+		prev.isSlash = string(current) == `\`
 	}
-	// print last character.
 	outputStr.WriteString(prev.character)
 	return outputStr.String(), nil
 }
