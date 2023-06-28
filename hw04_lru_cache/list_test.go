@@ -1,9 +1,9 @@
 package hw04lrucache
 
 import (
-	"testing"
-
+	"fmt"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
 func TestList(t *testing.T) {
@@ -47,5 +47,57 @@ func TestList(t *testing.T) {
 			elems = append(elems, i.Value.(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
+	})
+}
+
+func TestHardList(t *testing.T) {
+
+	l := NewList()
+
+	l.PushBack(1)
+	require.Equal(t, 1, l.Front().Value) // 1.
+	require.Equal(t, 1, l.Back().Value)  // 1.
+
+	// Test removing nil-pointer.
+	l.Remove(nil)
+	require.Equal(t, 1, l.Front().Value)
+
+	// Test removing once element in list.
+	l.Remove(l.Front())
+	require.Equal(t, l.Back(), l.Front())
+	require.Equal(t, 0, l.Len())
+
+	// Test removing front element.
+	l.PushBack(1)
+	l.PushFront(2)
+	l.Remove(l.Front())
+	require.Equal(t, 1, l.Front().Value)
+
+	// Test removing back element.
+	l.PushFront(3)
+	l.Remove(l.Back())
+	require.Equal(t, 3, l.Front().Value)
+}
+
+func TestPrintList(t *testing.T) {
+
+	l := NewList()
+	for i := 0; i < 10; i++ {
+		l.PushBack(i)
+	}
+	t.Run("Full List", func(t *testing.T) {
+		expected := "List, len=10 [0,1,2,3,4,5,6,7,8,9]"
+		require.Equal(t, expected, fmt.Sprint(l))
+	})
+
+	t.Run("Item List", func(t *testing.T) {
+		expected := "9"
+		require.Equal(t, expected, fmt.Sprint(l.Back()))
+	})
+
+	t.Run("Item nil", func(t *testing.T) {
+		item := new(ListItem)
+		item.Value = "a"
+		require.Equal(t, "", fmt.Sprint(item))
 	})
 }
