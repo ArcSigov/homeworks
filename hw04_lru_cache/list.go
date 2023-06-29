@@ -95,11 +95,11 @@ func (l *list) MoveToFront(i *ListItem) {
 		l.last.Next = nil
 		i.Next = l.first
 		i.Prev = nil
+		l.first = i
 	default:
 		i.Prev.Next = i.Next
 		i.Next = l.first
 	}
-	l.first = i
 }
 
 func (l *ListItem) String() string {
