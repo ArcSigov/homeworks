@@ -23,22 +23,15 @@ type ListItem struct {
 }
 
 type list struct {
-	count int
+	len   int
 	first *ListItem
 	last  *ListItem
 }
 
-func (l list) Len() int {
-	return l.count
-}
-
-func (l *list) Front() *ListItem {
-	return l.first
-}
-
-func (l *list) Back() *ListItem {
-	return l.last
-}
+func NewList() List              { return new(list) }
+func (l *list) Front() *ListItem { return l.first }
+func (l *list) Back() *ListItem  { return l.last }
+func (l list) Len() int          { return l.len }
 
 func (l *list) PushFront(v interface{}) *ListItem {
 	if l.first == nil {
@@ -52,7 +45,7 @@ func (l *list) PushFront(v interface{}) *ListItem {
 		newFirst.Next = l.first
 		l.first = newFirst
 	}
-	l.count++
+	l.len++
 	return l.first
 }
 
@@ -68,16 +61,14 @@ func (l *list) PushBack(v interface{}) *ListItem {
 		newLast.Prev = l.last
 		l.last = newLast
 	}
-	l.count++
+	l.len++
 	return l.last
 }
 
 func (l *list) Remove(i *ListItem) {
-
-	if i == nil || l.count == 0 {
+	if i == nil || l.len == 0 {
 		return
 	}
-
 	switch {
 	case i == l.first && i == l.last:
 		l.first = nil
@@ -89,28 +80,26 @@ func (l *list) Remove(i *ListItem) {
 	default:
 		i.Prev.Next = i.Next
 	}
-	l.count--
+	l.len--
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-	if i == nil || i == l.first {
+	if i == nil {
 		return
 	}
-
-	prev := i.Prev
-	prev.Next = i.Next
-
-	if i == l.last {
-		l.last = prev
+	switch {
+	case i == l.first:
+		return
+	case i == l.last:
+		l.last = i.Prev
+		l.last.Next = nil
+		i.Next = l.first
+		i.Prev = nil
+	default:
+		i.Prev.Next = i.Next
+		i.Next = l.first
 	}
-
-	i.Prev = nil
-	i.Next = l.first
 	l.first = i
-}
-
-func NewList() List {
-	return new(list)
 }
 
 func (l *ListItem) String() string {
@@ -124,11 +113,11 @@ func (l list) String() string {
 	var out strings.Builder
 	out.WriteString("List, len=" + strconv.Itoa(l.Len()) + " [")
 	item := l.first
-	for i := 0; i < l.count; i++ {
+	for i := 0; i < l.len; i++ {
 		if i != 0 {
 			out.WriteString(",")
 		}
-		out.WriteString(fmt.Sprint(item))
+		out.WriteString(fmt.Sprint(item.Value))
 		item = item.Next
 	}
 	out.WriteString("]")
