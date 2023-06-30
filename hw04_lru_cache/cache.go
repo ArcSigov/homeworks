@@ -14,15 +14,43 @@ type lruCache struct {
 	items    map[Key]*ListItem
 }
 
-func (c *lruCache) Set(_ Key, _ interface{}) bool {
-	c.capacity = 1
-	return true
+// Алгоритм работы кэша:
+// - при добавлении элемента:
+//     - если элемент присутствует в словаре, то обновить его значение и переместить элемент в начало очереди;
+//     - если элемента нет в словаре, то добавить в словарь и в начало очереди
+//       (при этом, если размер очереди больше ёмкости кэша,
+//       то необходимо удалить последний элемент из очереди и его значение из словаря);
+//     - возвращаемое значение - флаг, присутствовал ли элемент в кэше.
+// - при получении элемента:
+//     - если элемент присутствует в словаре, то переместить элемент в начало очереди и вернуть его значение и true;
+//     - если элемента нет в словаре, то вернуть nil и false
+//     (работа с кешом похожа на работу с `map`)
+
+func (c *lruCache) Set(key Key, value interface{}) bool {
+	item, finded := c.items[key]
+	if finded {
+		item.Value = value
+		c.queue.MoveToFront(item)
+	} else {
+		if c.queue.Len() == c.capacity {
+			delete(c.items, key)
+			c.queue.Remove(c.queue.Back())
+		}
+		c.queue.PushFront(value)
+		c.items[key] = c.queue.Front()
+	}
+	return finded
 }
 
-func (c *lruCache) Get(_ Key) (interface{}, bool) {
-	c.capacity = 1
-	return 1, false
+func (c *lruCache) Get(key Key) (interface{}, bool) {
+	item, finded := c.items[key]
+	if finded {
+		c.queue.MoveToFront(item)
+		return item.Value, finded
+	}
+	return nil, false
 }
+
 func (c *lruCache) Clear() {
 
 }

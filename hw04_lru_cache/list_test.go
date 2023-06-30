@@ -53,31 +53,76 @@ func TestList(t *testing.T) {
 
 func TestHardList(t *testing.T) {
 
-	l := NewList()
+	t.Run("Equal back and front", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(1)
+		require.Equal(t, 1, l.Front().Value) // 1.
+		require.Equal(t, 1, l.Back().Value)  // 1.
+	})
 
-	l.PushBack(1)
-	require.Equal(t, 1, l.Front().Value) // 1.
-	require.Equal(t, 1, l.Back().Value)  // 1.
+	t.Run("Remove and move nil item", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(1)
+		l.Remove(nil)
+		l.MoveToFront(nil)
+		require.Equal(t, 1, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+	})
 
-	// Test removing nil-pointer.
-	l.Remove(nil)
-	require.Equal(t, 1, l.Front().Value)
+	t.Run("Remove at Front", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(1)
+		l.PushBack(2)
+		l.Remove(l.Front())
+		require.Equal(t, 2, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+	})
 
-	// Test removing once element in list.
-	l.Remove(l.Front())
-	require.Equal(t, l.Back(), l.Front())
-	require.Equal(t, 0, l.Len())
+	t.Run("Remove at Back", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(1)
+		l.PushBack(2)
+		l.Remove(l.Back())
+		require.Equal(t, 1, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+	})
 
-	// Test removing front element.
-	l.PushBack(1)
-	l.PushFront(2)
-	l.Remove(l.Front())
-	require.Equal(t, 1, l.Front().Value)
+	t.Run("Remove once", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(1)
+		l.Remove(l.Back())
+		require.Equal(t, l.Back(), l.Front())
+		require.Equal(t, 0, l.Len())
+	})
 
-	// Test removing back element.
-	l.PushFront(3)
-	l.Remove(l.Back())
-	require.Equal(t, 3, l.Front().Value)
+	t.Run("Middle move", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(2)
+		middle := l.PushBack(1)
+		l.PushBack(3)
+		fmt.Println(l)
+		l.MoveToFront(middle)
+		require.Equal(t, 1, l.Front().Value)
+		require.Equal(t, 1, l.Len())
+	})
+
+	// // Test removing nil-pointer.
+
+	// // Test removing once element in list.
+	// l.Remove(l.Front())
+	// require.Equal(t, l.Back(), l.Front())
+	// require.Equal(t, 0, l.Len())
+
+	// // Test removing front element.
+	// l.PushBack(1)
+	// l.PushFront(2)
+	// l.Remove(l.Front())
+	// require.Equal(t, 1, l.Front().Value)
+
+	// // Test removing back element.
+	// l.PushFront(3)
+	// l.Remove(l.Back())
+	// require.Equal(t, 3, l.Front().Value)
 }
 
 func TestPrintList(t *testing.T) {
