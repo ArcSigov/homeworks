@@ -86,9 +86,7 @@ func (l *list) Remove(i *ListItem) {
 
 func (l *list) MoveToFront(i *ListItem) {
 	switch {
-	case i == nil:
-		return
-	case i == l.first:
+	case i == nil || i == l.first:
 		return
 	case i == l.last:
 		buf1 := l.first
@@ -103,6 +101,7 @@ func (l *list) MoveToFront(i *ListItem) {
 		}
 	default:
 		buf := l.first
+		l.first.Prev = i
 		i.Prev.Next = i.Next
 		i.Next.Prev = i.Prev
 		l.first = i

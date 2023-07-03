@@ -100,29 +100,10 @@ func TestHardList(t *testing.T) {
 		l.PushBack(2)
 		middle := l.PushBack(1)
 		l.PushBack(3)
-		fmt.Println(l)
 		l.MoveToFront(middle)
 		require.Equal(t, 1, l.Front().Value)
-		require.Equal(t, 1, l.Len())
+		require.Equal(t, 3, l.Len())
 	})
-
-	// // Test removing nil-pointer.
-
-	// // Test removing once element in list.
-	// l.Remove(l.Front())
-	// require.Equal(t, l.Back(), l.Front())
-	// require.Equal(t, 0, l.Len())
-
-	// // Test removing front element.
-	// l.PushBack(1)
-	// l.PushFront(2)
-	// l.Remove(l.Front())
-	// require.Equal(t, 1, l.Front().Value)
-
-	// // Test removing back element.
-	// l.PushFront(3)
-	// l.Remove(l.Back())
-	// require.Equal(t, 3, l.Front().Value)
 }
 
 func TestPrintList(t *testing.T) {
