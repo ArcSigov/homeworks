@@ -104,6 +104,15 @@ func TestHardList(t *testing.T) {
 		require.Equal(t, 1, l.Front().Value)
 		require.Equal(t, 3, l.Len())
 	})
+
+	t.Run("Move back", func(t *testing.T) {
+		l := NewList()
+		l.PushBack(2)
+		l.PushBack(1)
+		l.MoveToFront(l.Back())
+		require.Equal(t, 1, l.Front().Value)
+		require.Equal(t, 2, l.Len())
+	})
 }
 
 func TestPrintList(t *testing.T) {

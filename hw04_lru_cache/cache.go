@@ -1,5 +1,7 @@
 package hw04lrucache
 
+import "sync"
+
 type Key string
 
 type Cache interface {
@@ -9,38 +11,56 @@ type Cache interface {
 }
 
 type lruCache struct {
+	mutex    sync.Mutex
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
 }
 
+type storage struct {
+	key   Key
+	value interface{}
+}
+
 func (c *lruCache) Set(key Key, value interface{}) bool {
+	result := false
+	c.mutex.Lock()
 	item, finded := c.items[key]
 	if finded {
-		item.Value = value
+		result = true
+		item.Value = storage{key, value}
 		c.queue.MoveToFront(item)
 	} else {
 		if c.queue.Len() == c.capacity {
-			delete(c.items, key)
+			value := c.queue.Back().Value.(storage)
+			delete(c.items, value.key)
 			c.queue.Remove(c.queue.Back())
 		}
-		c.queue.PushFront(value)
+		c.queue.PushFront(storage{key, value})
 		c.items[key] = c.queue.Front()
 	}
-	return finded
+	c.mutex.Unlock()
+	return result
 }
 
 func (c *lruCache) Get(key Key) (interface{}, bool) {
+	c.mutex.Lock()
 	item, finded := c.items[key]
+	c.mutex.Unlock()
 	if finded {
+		c.mutex.Lock()
 		c.queue.MoveToFront(item)
-		return item.Value, finded
+		c.mutex.Unlock()
+		return item.Value.(storage).value, finded
 	}
 	return nil, false
 }
 
 func (c *lruCache) Clear() {
-
+	c.mutex.Lock()
+	c.queue = NewList()
+	c.items = make(map[Key]*ListItem, c.capacity)
+	c.mutex.Unlock()
 }
 
 func NewCache(capacity int) Cache {

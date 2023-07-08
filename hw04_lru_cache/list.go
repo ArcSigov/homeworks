@@ -89,16 +89,13 @@ func (l *list) MoveToFront(i *ListItem) {
 	case i == nil || i == l.first:
 		return
 	case i == l.last:
-		buf1 := l.first
-		buf2 := l.last.Prev
+		buf := l.last.Prev
+		l.last.Next = l.first
+		l.first.Prev = l.last
 		l.first = l.last
-		l.first.Next = buf1
+		l.last = buf
 		l.first.Prev = nil
-		l.last = buf2
 		l.last.Next = nil
-		if l.Len() == 2 {
-			l.last.Prev = l.first
-		}
 	default:
 		buf := l.first
 		l.first.Prev = i
