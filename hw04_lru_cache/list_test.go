@@ -52,7 +52,6 @@ func TestList(t *testing.T) {
 }
 
 func TestHardList(t *testing.T) {
-
 	t.Run("Equal back and front", func(t *testing.T) {
 		l := NewList()
 		l.PushBack(1)
@@ -116,7 +115,6 @@ func TestHardList(t *testing.T) {
 }
 
 func TestPrintList(t *testing.T) {
-
 	l := NewList()
 	for i := 0; i < 10; i++ {
 		l.PushBack(i)

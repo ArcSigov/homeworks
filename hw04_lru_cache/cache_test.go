@@ -92,12 +92,10 @@ func TestCache(t *testing.T) {
 			require.False(t, ok)
 			require.Nil(t, val)
 		}
-
 	})
 }
 
-func TestCacheMultithreading(t *testing.T) {
-
+func TestCacheMultithreading(_ *testing.T) {
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)

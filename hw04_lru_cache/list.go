@@ -69,7 +69,7 @@ func (l *list) Remove(i *ListItem) {
 	switch {
 	case i == nil || l.len == 0:
 		return
-	case i == l.first && i == l.last:
+	case i == l.first && l.first == l.last:
 		l.first = nil
 		l.last = l.first
 	case i == l.first:
