@@ -47,7 +47,7 @@ func (c *lruCache) Get(key Key) (interface{}, bool) {
 	c.mutex.Lock()
 	item, found := c.items[key]
 	c.mutex.Unlock()
-	if finded {
+	if found {
 		c.mutex.Lock()
 		c.queue.MoveToFront(item)
 		c.mutex.Unlock()
