@@ -114,7 +114,7 @@ func (l *ListItem) String() string {
 	return ""
 }
 
-func (l list) String() string {
+func (l *list) String() string {
 	var out strings.Builder
 	out.WriteString("List, len=" + strconv.Itoa(l.Len()) + " [")
 	item := l.first
