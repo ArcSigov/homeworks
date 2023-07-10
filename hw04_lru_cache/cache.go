@@ -45,7 +45,7 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 
 func (c *lruCache) Get(key Key) (interface{}, bool) {
 	c.mutex.Lock()
-	item, finded := c.items[key]
+	item, found := c.items[key]
 	c.mutex.Unlock()
 	if finded {
 		c.mutex.Lock()
