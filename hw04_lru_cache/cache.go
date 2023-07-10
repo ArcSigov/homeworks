@@ -26,7 +26,7 @@ func (c *lruCache) Set(key Key, value interface{}) bool {
 	result := false
 	c.mutex.Lock()
 	item, found := c.items[key]
-	if finded {
+	if found {
 		result = true
 		item.Value = storage{key, value}
 		c.queue.MoveToFront(item)
