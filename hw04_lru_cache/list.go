@@ -31,7 +31,7 @@ type list struct {
 func NewList() List              { return new(list) }
 func (l *list) Front() *ListItem { return l.first }
 func (l *list) Back() *ListItem  { return l.last }
-func (l *list) Len() int          { return l.len }
+func (l *list) Len() int         { return l.len }
 
 func (l *list) PushFront(v interface{}) *ListItem {
 	if l.first == nil {
