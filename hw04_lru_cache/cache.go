@@ -25,7 +25,7 @@ type storage struct {
 func (c *lruCache) Set(key Key, value interface{}) bool {
 	result := false
 	c.mutex.Lock()
-	item, finded := c.items[key]
+	item, found := c.items[key]
 	if finded {
 		result = true
 		item.Value = storage{key, value}
