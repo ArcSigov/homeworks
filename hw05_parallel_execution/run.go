@@ -16,7 +16,7 @@ func Run(tasks []Task, n, m int) error {
 	wg := &sync.WaitGroup{}
 	wg.Add(n + 1)
 
-	var errors int32 = 0
+	errors := int32(0)
 
 	go func() {
 		defer wg.Done()
