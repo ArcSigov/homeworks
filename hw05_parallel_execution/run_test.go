@@ -133,5 +133,4 @@ func TestRun(t *testing.T) {
 		errorr := Run(tasks, workersCount, maxErrorsCount)
 		require.NoError(t, errorr)
 	})
-
 }
