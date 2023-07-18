@@ -15,7 +15,6 @@ func Run(tasks []Task, n, m int) error {
 	tch := make(chan Task, len(tasks))
 	wg := &sync.WaitGroup{}
 	wg.Add(n)
-
 	errors := int32(0)
 
 	for _, t := range tasks {
