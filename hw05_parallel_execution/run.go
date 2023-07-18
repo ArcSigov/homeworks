@@ -26,7 +26,7 @@ func Run(tasks []Task, n, m int) error {
 		go func(err int) {
 			defer wg.Done()
 			for {
-				if err > -1 && atomic.LoadInt32(&errors) >= int32(err) {
+				if err >= 0 && atomic.LoadInt32(&errors) >= int32(err) {
 					break
 				} else if tFunc, ok := <-tch; ok {
 					if err := tFunc(); err != nil {
@@ -40,7 +40,7 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	wg.Wait()
-	if m > -1 && errors >= int32(m) {
+	if m >= 0 && errors >= int32(m) {
 		return ErrErrorsLimitExceeded
 	}
 	return nil
