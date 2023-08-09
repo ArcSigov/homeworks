@@ -15,7 +15,11 @@ func Run(tasks []Task, n, m int) error {
 	tch := make(chan Task, len(tasks))
 	wg := &sync.WaitGroup{}
 	wg.Add(n)
-	errors := int32(-1)
+	errors := int32(0)
+
+	if n == 0 {
+		return nil
+	}
 
 	for _, t := range tasks {
 		tch <- t
@@ -23,25 +27,21 @@ func Run(tasks []Task, n, m int) error {
 	close(tch)
 
 	for i := 0; i < n; i++ {
-		go func(err int) {
+		go func(err int32) {
 			defer wg.Done()
-			for {
-				if atomic.LoadInt32(&errors) > int32(err) {
-					break
-				} else if tFunc, ok := <-tch; ok {
-					if result := tFunc(); result != nil && err >= 0 {
-						atomic.AddInt32(&errors, 1)
-						break
-					}
-				} else {
+			for tFunc := range tch {
+				if err >= 0 && atomic.LoadInt32(&errors) >= err {
 					break
 				}
+				if result := tFunc(); result != nil {
+					atomic.AddInt32(&errors, 1)
+				}
 			}
-		}(m)
+		}(int32(m))
 	}
 
 	wg.Wait()
-	if _, ok := <-tch; ok || errors > int32(m) {
+	if m >= 0 && errors >= int32(m) {
 		return ErrErrorsLimitExceeded
 	}
 	return nil
