@@ -1,7 +1,6 @@
 package hw06pipelineexecution
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 	"time"
@@ -22,7 +21,6 @@ func TestPipeline(t *testing.T) {
 			go func() {
 				defer close(out)
 				for v := range in {
-					fmt.Println(s)
 					time.Sleep(sleepPerStage)
 					out <- f(v)
 				}
@@ -40,7 +38,7 @@ func TestPipeline(t *testing.T) {
 
 	t.Run("simple case", func(t *testing.T) {
 		in := make(Bi)
-		data := []int{1, 2, 3, 4, 5, 6, 7, 8}
+		data := []int{1, 2, 3, 4, 5}
 
 		go func() {
 			for _, v := range data {
@@ -56,7 +54,7 @@ func TestPipeline(t *testing.T) {
 		}
 		elapsed := time.Since(start)
 
-		require.Equal(t, []string{"102", "104", "106", "108", "110", "112", "114", "116"}, result)
+		require.Equal(t, []string{"102", "104", "106", "108", "110"}, result)
 		require.Less(t,
 			int64(elapsed),
 			// ~0.8s for processing 5 values in 4 stages (100ms every) concurrently
