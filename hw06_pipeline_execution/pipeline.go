@@ -13,7 +13,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	var pipelineFunc func(in In) Out
 	pipelineFunc = func(in In) Out {
 		out := make(Bi)
-		i++
+		i = i + 1
 		go func(pos int) {
 			defer close(out)
 			for result := range stages[pos](in) {
