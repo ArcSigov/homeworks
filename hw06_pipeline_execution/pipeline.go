@@ -9,7 +9,6 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-
 	pipeLine := func(in In) Out {
 		outp := make(Bi)
 		go func() {
