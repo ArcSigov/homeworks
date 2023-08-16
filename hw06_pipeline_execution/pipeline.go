@@ -16,24 +16,22 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	}
 
 	pipeLine := func(in In, pos int) {
-		go func() {
-			defer close(out[pos])
-			for {
+		defer close(out[pos])
+		for {
+			select {
+			case <-done:
+				return
+			case res, ok := <-in:
+				if !ok {
+					return
+				}
 				select {
 				case <-done:
 					return
-				case res, ok := <-in:
-					if !ok {
-						return
-					}
-					select {
-					case <-done:
-						return
-					case out[pos] <- res:
-					}
+				case out[pos] <- res:
 				}
 			}
-		}()
+		}
 	}
 	if in != nil {
 		for pos, stage := range stages {
