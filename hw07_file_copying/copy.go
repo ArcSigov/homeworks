@@ -44,7 +44,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			break
 		}
 		outputFile.Write(buf)
-
 	}
 	return nil
 }
