@@ -11,7 +11,7 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
-func prepareInput(fromPath string, offset int64) (*os.File, error) {
+func prepareInput(fromPath string, offset int64, limit *int64) (*os.File, error) {
 	inputFile, err := os.Open(fromPath)
 	if err != nil {
 		return nil, ErrUnsupportedFile
@@ -20,14 +20,16 @@ func prepareInput(fromPath string, offset int64) (*os.File, error) {
 	if info.Size() <= offset {
 		return nil, ErrOffsetExceedsFileSize
 	}
-	if offset > 0 {
-		inputFile.Seek(offset, io.SeekStart)
+	inputFile.Seek(offset, io.SeekStart)
+
+	if *limit == 0 {
+		*limit = info.Size()
 	}
 	return inputFile, nil
 }
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-	file, err := prepareInput(fromPath, offset)
+	file, err := prepareInput(fromPath, offset, &limit)
 	if err != nil {
 		return err
 	}
@@ -37,7 +39,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	buf := make([]byte, 1)
 	copied := int64(0)
-	for limit == 0 || copied < limit {
+	for copied < limit {
 		count, err := file.Read(buf)
 		copied += int64(count)
 		if err == io.EOF {
