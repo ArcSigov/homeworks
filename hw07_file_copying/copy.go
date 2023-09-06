@@ -37,7 +37,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	buf := make([]byte, 1)
 	copied := int64(0)
-	for limit == 0 || copied <= limit {
+	for limit == 0 || copied < limit {
 		count, err := file.Read(buf)
 		copied += int64(count)
 		if err == io.EOF {
