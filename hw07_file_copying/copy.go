@@ -9,9 +9,10 @@ import (
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
+	pBar                     = ProgressBar()
 )
 
-func openAndPrepareInput(fromPath string, offset int64, limit *int64) (*os.File, error) {
+func openFileAndPrepareInput(fromPath string, offset int64, limit *int64) (*os.File, error) {
 	inputFile, err := os.Open(fromPath)
 	if err != nil {
 		return nil, ErrUnsupportedFile
@@ -29,21 +30,24 @@ func openAndPrepareInput(fromPath string, offset int64, limit *int64) (*os.File,
 }
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-	file, err := openAndPrepareInput(fromPath, offset, &limit)
+	file, err := openFileAndPrepareInput(fromPath, offset, &limit)
 	outputFile, _ := os.Create(toPath)
 	if err != nil {
 		return err
 	}
-
+	pBar.SetMin(0)
+	pBar.SetMax(limit)
 	buf := make([]byte, 1)
 	copied := int64(0)
 	for copied < limit {
 		count, err := file.Read(buf)
-		copied += int64(count)
 		if err == io.EOF {
+			pBar.AddProgress(limit - int64(copied))
 			break
 		}
-		outputFile.Write(buf)
+		copied += int64(count)
+		outputFile.Write(buf[:count])
+		pBar.AddProgress(int64(count))
 	}
 	file.Close()
 	outputFile.Close()
