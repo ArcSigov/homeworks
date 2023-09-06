@@ -9,7 +9,7 @@ import (
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
-	pBar                     = ProgressBar()
+	pB                       = ProgressBar()
 )
 
 func openFileAndPrepareInput(fromPath string, offset int64, limit *int64) (*os.File, error) {
@@ -35,19 +35,19 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
-	pBar.SetMin(0)
-	pBar.SetMax(limit)
+	pB.SetMin(0)
+	pB.SetMax(limit)
 	buf := make([]byte, 1)
 	copied := int64(0)
 	for copied < limit {
 		count, err := file.Read(buf)
 		if err == io.EOF {
-			pBar.AddProgress(limit - int64(copied))
+			pB.AddProgress(limit - copied)
 			break
 		}
 		copied += int64(count)
 		outputFile.Write(buf[:count])
-		pBar.AddProgress(int64(count))
+		pB.AddProgress(int64(count))
 	}
 	file.Close()
 	outputFile.Close()
